@@ -56,23 +56,10 @@
             }, delay);
         }
     </script>
-        function typeWriter(element, text, delay = 100) {
-            let i = 0;
-            const interval = setInterval(() => {
-                if (i < text.length) {
-                    element.innerHTML += text.charAt(i);
-                    i++;
-                } else {
-                    clearInterval(interval);
-                }
-            }, delay);
-        }
-    </script>
 
     <h1 id="heading"></h1>
     <a href="/source/img.html">Get fun</a>
-
-
+    
     <script>
         const heading = document.getElementById('heading');
         typeWriter(heading, 'Hello, world!');
