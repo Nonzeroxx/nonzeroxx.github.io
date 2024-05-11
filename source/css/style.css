@@ -1,0 +1,14 @@
+@font-face {
+    font-family: "BitmapFont";
+    src: url("fonts/VonwaonBitmap-12px.ttf") format("truetype")
+}
+
+body {
+    font-family: "BitmapFont", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    flex-direction: column;
+}
