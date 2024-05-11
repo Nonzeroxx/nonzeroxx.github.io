@@ -12,7 +12,24 @@
 
     <script src="../source/js/live2d.js"></script>
 
-    <a href="/img/Screenshot_20230321_185649.png" download="1.png">download image</a>
+    <a id="downloadLink" href="#">download image</a>
+    <script>
+        const images = [
+            '../img/5-toubun_no_Hanayome.png',
+            '../img/NakanoIchika.png',
+            '../img/NakanoNino.png',
+            '../img/NakanoMiku.png',
+            '../img/NakanoYotsuba.png',
+            '../img/NakanoItsuki.png'
+        ]
+        document.getElementById('downloadLink').addEventListener('click', function() {
+            const randomIndex = Math.floor(Math.random() * images.length)
+            const imageUrl = images[randomIndex]
+            const fileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1)
+            this.href = imageUrl
+            this.download = fileName 
+        })
+    </script>
 </body>
 
 </html>
