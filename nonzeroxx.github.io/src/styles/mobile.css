@@ -1,0 +1,44 @@
+.mobile {
+  .main .aside-content {
+    &.mobile-mode {
+      position: fixed;
+      top: var(--global-header-height);
+      left: 0;
+      bottom: 0;
+      max-width: 280px;
+      min-width: 255px;
+      width: calc(70vw);
+      height: auto !important;
+      /* height: calc(100dvh - var(--global-header-height)); */
+      background-color: var(--sidebar-background-color);
+      border-right: 1px solid var(--sidebar-border-right-color);
+      backdrop-filter: blur(10px) saturate(1.2);
+      opacity: 0;
+      visibility: hidden;
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out,
+        visibility 0.3s ease-in-out, width 0.3s ease-in-out,
+        min-width 0.3s ease-in-out, max-width 0.3s ease-in-out;
+
+      &.collapsed {
+        transform: translateX(-100%);
+        opacity: 0;
+        visibility: hidden;
+        .aside-theme-switch {
+            opacity: 0;
+        }
+      }
+
+      &.expand {
+        transform: translateX(0);
+        opacity: 1;
+        visibility: visible;
+
+        .aside-theme-switch {
+          position: fixed;
+          left: 20px;
+          bottom: 30px;
+        }
+      }
+    }
+  }
+}

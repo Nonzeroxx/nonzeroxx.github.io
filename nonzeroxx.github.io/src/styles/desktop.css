@@ -1,0 +1,14 @@
+.desktop {
+  .aside {
+    &.desktop-mode {
+
+      &.collapsed {
+        max-width: 0px;
+      }
+
+      &.expand {
+        width: 100%;
+      }
+    }
+  }
+}

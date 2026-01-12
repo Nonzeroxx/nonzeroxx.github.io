@@ -1,0 +1,25 @@
+:root {
+  font-size: 14px;
+  font-family: serif, sans-serif;
+  user-select: none;
+
+  /* page width */
+  --global-page-width: 1350px;
+
+  /* header */
+  --global-header-background-color: rgba(255, 255, 255, 0.8);
+  --global-header-border-bottom-color: rgba(0, 0, 0, 0.1);
+  --global-header-height: 50px;
+
+  /* icon size */
+  --global-icon-size: 1.5rem;
+
+  /* title */
+  --title-font-size: 1.2rem;
+  --title-font-weight: 800;
+
+  --zindex-globalheader: 15;
+  --zindex-popover: 20;
+  --zindex-aside-content: 10;
+  --zindex-main: 5;
+}
