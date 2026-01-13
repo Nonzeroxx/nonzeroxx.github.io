@@ -29,6 +29,10 @@ ul, ol{
   --popover-background-color: rgba(33, 33, 33, 0.818);
   /* selector */
   --selector-selected-background-color: rgba(169, 169, 169, 0.5);
+
+  #live2d {
+    filter: brightness(0.8);
+  }
 }
 
 .light {
