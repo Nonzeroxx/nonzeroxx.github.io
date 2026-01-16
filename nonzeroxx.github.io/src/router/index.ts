@@ -4,7 +4,13 @@ const routes = [
     {
         path: '/',
         name: 'index',
-        component: () => import('@/views/Home.vue')
+        component: () => import('@/views/Home.vue'),
+        children: [
+            {
+                path: '',
+                component: () => import('@/views/welcome.vue')
+            }
+        ]
     },
     {
         path: '/:pathMatch(.*)*',

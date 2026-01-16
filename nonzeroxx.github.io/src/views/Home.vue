@@ -165,6 +165,9 @@ onUnmounted(() => {
       <p style="white-space: pre-wrap; margin: 0; line-height: 1.5">
         {{ poem }}
       </p>
+      <Transition>
+        <RouterView />
+      </Transition>
     </section>
   </main>
 </template>
