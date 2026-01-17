@@ -6,6 +6,7 @@ import { Icon } from "@iconify/vue";
 import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue";
 import Popover from "@/components/Popover.vue";
 import Selector from "@/components/Selector.vue";
+import router from "@/router";
 
 const isMobile = useDeviceClass();
 const { currentThemeMode, toggleTheme } = useTheme();
@@ -88,6 +89,13 @@ const clickOutside = (e: MouseEvent) => {
   }
 };
 
+const goto = (path: string) => {
+  router.push(path);
+  if(isMobile.value && !isSidebarCollapsed.value) {
+    toggleSidebar()
+  }
+}
+
 onMounted(() => {
   window.addEventListener("click", clickOutside);
 });
@@ -131,8 +139,8 @@ onUnmounted(() => {
         :class="asideMobileModeCls"
       >
         <ol>
-          <li @click="$router.push('/404')">Connectivity Test</li>
-          <li @click="$router.push('/konosuba')">konosuba</li>
+          <li @click="goto('/404')">Connectivity Test</li>
+          <li @click="goto('/konosuba')">konosuba</li>
         </ol>
         <div v-if="isMobile" class="aside-theme-switch">
           <Selector

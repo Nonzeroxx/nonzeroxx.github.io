@@ -28,7 +28,7 @@ onMounted(async () => {
 
   try {
     model = await Live2DModel.from(
-      "/live2d/アクア ［花鳥風月］/［花鳥風月］アクア.model3.json"
+      "/live2d/アクア ［花鳥風月］/［花鳥風月］アクア.model3.json",
       // "/live2d/アクア ［きらめく海の世界］/［きらめく海の世界］アクア.model3.json"
       // "/live2d/めぐみん ［ナイス爆裂!!］/［ナイス爆裂!!］めぐみん.model3.json"
       // "/live2d/Og Aqua Slime/Character.model3.json"
@@ -58,6 +58,11 @@ onMounted(async () => {
     // --- 6. 动作播放逻辑优化 ---
     const motions = [1, 9, 14, 5]; // 12, 17 x
     let motionPointer = 0;
+
+    const plusOneMotionPointer = () => {
+      return motionPointer = (motionPointer + 1) % motions.length;
+    };
+
     let motionTimeout: ReturnType<typeof setTimeout> | null = null;
     model.on("pointertap", () => {
       // 强制停止当前所有正在播放的动作
@@ -72,9 +77,13 @@ onMounted(async () => {
       model?.motion("", motions[motionPointer]);
       log(`Playing motion index: ${motions[motionPointer]}`);
       motionTimeout = setTimeout(() => {
-        motionPointer = (motionPointer + 1) % motions.length;
+        plusOneMotionPointer();
       }, 3000);
     });
+    model?.motion("", motions[0]);
+    setInterval(() => {
+      model?.motion("", motions[plusOneMotionPointer()]);
+    }, 15000);
   } catch (error) {
     console.error("Failed to load Live2D:", error);
   }
