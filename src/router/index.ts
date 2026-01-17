@@ -10,6 +10,10 @@ const routes = [
         name: "index",
         component: () => import("@/views/welcome.vue"),
       },
+      {
+        path: 'konosuba',
+        component: () => import("@/views/konosuba.vue")
+      }
     ],
   },
   {

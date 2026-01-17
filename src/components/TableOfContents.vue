@@ -20,13 +20,13 @@ const props = defineProps({
 const toc = ref<TocItem[]>([]);
 const activeId = ref<string>('');
 const isMobileMenuOpen = ref<boolean>(false);
-const isMobile = ref<boolean>(window.innerWidth < 720); // 初始化时就检测
+const isMobile = ref<boolean>(window.innerWidth < 1200); // 初始化时就检测
 let observer: IntersectionObserver | null = null;
 let resizeObserver: ResizeObserver | null = null;
 
 // 检测是否为移动端
 const checkMobile = () => {
-  const newIsMobile = window.innerWidth < 720;
+  const newIsMobile = window.innerWidth < 1200;
   
   // 只有真正发生变化时才更新
   if (isMobile.value !== newIsMobile) {
@@ -405,7 +405,7 @@ ul {
 }
 
 /* 响应式调整 */
-@media (max-width: 720px) {
+@media (max-width: 1200px) {
   .toc-mobile-trigger {
     top: 50px;
     right: 8px;
