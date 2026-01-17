@@ -228,6 +228,12 @@ onUnmounted(() => {
     /* background-color: rgb(56, 160, 160); */
     transition: max-width 0.4s ease-in-out;
 
+    ul,
+    ol {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
     .aside-content {
       padding: 30px 25px;
       box-sizing: border-box;

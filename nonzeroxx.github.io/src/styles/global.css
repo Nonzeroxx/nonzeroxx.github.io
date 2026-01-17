@@ -9,9 +9,10 @@ li {
   list-style: none;
 }
 
-ul, ol{
-    font-size: 1.2rem;
-    font-weight: bold;
+html {
+  scroll-behavior: smooth;
+  /* 如果你的导航栏高度是 60px，这里设置大一点，比如 80px */
+  scroll-padding-top: 50px; 
 }
 
 .dark {
