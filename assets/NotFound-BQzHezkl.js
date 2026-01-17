@@ -1,1 +1,0 @@
-import{_ as n,g as s,s as t,h as e}from"./index-zj1NcKTo.js";const a={},c={class:"container"};function r(_,o){return t(),s("div",c,[...o[0]||(o[0]=[e("div",{class:"content"},[e("h1",null,"404"),e("p",null,"There is nothing here."),e("a",{href:"/"},"go back home")],-1)])])}const l=n(a,[["render",r],["__scopeId","data-v-e7f7b27f"]]);export{l as default};
