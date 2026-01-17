@@ -20,22 +20,22 @@ const props = defineProps({
 const toc = ref<TocItem[]>([]);
 const activeId = ref<string>('');
 const isMobileMenuOpen = ref<boolean>(false);
-const isMobile = ref<boolean>(false);
+const isMobile = ref<boolean>(window.innerWidth < 720); // 初始化时就检测
 let observer: IntersectionObserver | null = null;
 let resizeObserver: ResizeObserver | null = null;
 
 // 检测是否为移动端
 const checkMobile = () => {
-  const wasMobile = isMobile.value;
-  isMobile.value = window.innerWidth < 720;
+  const newIsMobile = window.innerWidth < 720;
   
-  // 从桌面端切换到移动端时，关闭菜单避免闪现
-  if (!wasMobile && isMobile.value) {
+  // 只有真正发生变化时才更新
+  if (isMobile.value !== newIsMobile) {
+    // 先关闭菜单
     isMobileMenuOpen.value = false;
-  }
-  // 从移动端切换到桌面端时，也关闭菜单
-  if (wasMobile && !isMobile.value) {
-    isMobileMenuOpen.value = false;
+    // 使用 nextTick 确保状态更新后再切换模式
+    setTimeout(() => {
+      isMobile.value = newIsMobile;
+    }, 0);
   }
 };
 
@@ -101,7 +101,7 @@ const toggleMobileMenu = () => {
 
 onMounted(() => {
   initToc();
-  checkMobile();
+  // 不需要再次调用 checkMobile，因为已经在 ref 初始化时设置了
   
   // 监听窗口大小变化
   window.addEventListener('resize', checkMobile);
@@ -140,13 +140,14 @@ onUnmounted(() => {
       :class="{ active: isMobileMenuOpen }"
       aria-label="目录"
     >
-      <Icon icon="solar:reorder-bold-duotone" width="24" height="24" />
+      <Icon icon="solar:reorder-broken" width="28" height="28" />
     </button>
 
     <!-- 目录容器 -->
-    <Transition :name="isMobile ? 'dropdown' : ''">
+    <Transition :name="isMobile ? 'dropdown' : ''" mode="out-in">
       <nav 
-        v-show="!isMobile || isMobileMenuOpen"
+        v-if="isMobile ? isMobileMenuOpen : true" 
+        :key="isMobile ? 'mobile' : 'desktop'"
         class="toc-container"
         :class="{ 'mobile-menu': isMobile }"
       >
@@ -230,10 +231,34 @@ ul {
 }
 
 .toc-item.active {
-  color: #409eff;
+  /* color: #409eff; */
   font-weight: 600;
   border-left: 2px solid #409eff;
+}
+
+/* 为 active 状态的不同层级设置正确的缩进（原缩进 + 8px border补偿） */
+.toc-item.active.level-1 {
   padding-left: 8px;
+}
+
+.toc-item.active.level-2 {
+  padding-left: 16px; /* 8 + 8 */
+}
+
+.toc-item.active.level-3 {
+  padding-left: 28px; /* 20 + 8 */
+}
+
+.toc-item.active.level-4 {
+  padding-left: 40px; /* 32 + 8 */
+}
+
+.toc-item.active.level-5 {
+  padding-left: 52px; /* 44 + 8 */
+}
+
+.toc-item.active.level-6 {
+  padding-left: 64px; /* 56 + 8 */
 }
 
 .toc-item a {
@@ -242,7 +267,7 @@ ul {
   color: inherit;
 }
 
-/* 层级缩进 */
+/* 层级缩进 - 适用于桌面端和移动端 */
 .level-1 {
   padding-left: 0;
 }
@@ -271,43 +296,40 @@ ul {
   font-size: 12px;
 }
 
-/* 移动端悬浮按钮 */
+/* 移动端悬浮按钮 - 纯图标悬浮效果 */
 .toc-mobile-trigger {
   position: fixed;
-  top: 20px;
-  right: 20px;
   width: 48px;
   height: 48px;
-  border-radius: 50%;
-  background: #409eff;
-  color: white;
+  background: transparent;
+  color: #606266;
   border: none;
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
   cursor: pointer;
   z-index: 1001;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
 }
 
 .toc-mobile-trigger:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
+  /* color: #409eff; */
+  transform: scale(1.1);
 }
 
 .toc-mobile-trigger:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
 }
 
 .toc-mobile-trigger.active {
-  background: #66b1ff;
+  /* color: #409eff; */
 }
 
 /* 移动端目录样式 - 下拉展开效果 */
 .toc-container.mobile-menu {
   position: fixed;
-  top: 76px;
+  top: 90px;
   right: 12px;
   width: 280px;
   max-width: calc(100vw - 24px);
@@ -321,42 +343,10 @@ ul {
   background: #fff;
 }
 
-/* 移动端保持分级缩进效果 */
-.mobile-menu .level-1 {
-  padding-left: 0;
-}
-
-.mobile-menu .level-2 {
-  padding-left: 8px;
-}
-
-.mobile-menu .level-3 {
-  padding-left: 20px;
-  font-size: 13px;
-}
-
-.mobile-menu .level-4 {
-  padding-left: 32px;
-  font-size: 13px;
-}
-
-.mobile-menu .level-5 {
-  padding-left: 44px;
-  font-size: 12px;
-}
-
-.mobile-menu .level-6 {
-  padding-left: 56px;
-  font-size: 12px;
-}
-
 .mobile-menu .toc-item {
-  padding: 10px 8px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   margin: 2px 0;
-}
-
-.mobile-menu .toc-item.active {
-  padding-left: 8px; /* active状态额外缩进会和level缩进叠加 */
 }
 
 .mobile-menu .toc-item:active {
@@ -364,17 +354,35 @@ ul {
   border-radius: 4px;
 }
 
-/* 下拉动画效果 */
-.dropdown-enter-active,
-.dropdown-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+/* 下拉动画效果 - 从按钮位置向下展开 */
+.dropdown-enter-active {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: top right;
 }
 
-.dropdown-enter-from,
+.dropdown-leave-active {
+  transition: all 0.15s cubic-bezier(0.4, 0, 1, 1);
+  transform-origin: top right;
+}
+
+.dropdown-enter-from {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.9);
+}
+
+.dropdown-enter-to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.dropdown-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
 .dropdown-leave-to {
   opacity: 0;
-  transform: scale(0.95) translateY(-10px);
+  transform: translateY(-12px) scale(0.9);
 }
 
 /* 自定义滚动条 */
@@ -399,8 +407,8 @@ ul {
 /* 响应式调整 */
 @media (max-width: 720px) {
   .toc-mobile-trigger {
-    top: 16px;
-    right: 16px;
+    top: 50px;
+    right: 8px;
     width: 44px;
     height: 44px;
   }
@@ -413,6 +421,7 @@ ul {
 :global(#article-content h4),
 :global(#article-content h5),
 :global(#article-content h6) {
-  scroll-margin-top: 100px;
+  scroll-margin-top: 65px;
 }
+
 </style>
