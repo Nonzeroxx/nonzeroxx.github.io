@@ -11,16 +11,16 @@ const routes = [
         component: () => import("@/views/welcome.vue"),
       },
       {
-        path: 'konosuba',
-        component: () => import("@/views/konosuba.vue")
-      }
+        path: "konosuba",
+        component: () => import("@/views/konosuba.vue"),
+      },
+      {
+        path: "/:pathMatch(.*)*",
+        name: "NotFound",
+        component: () => import("@/views/NotFound.vue"),
+        meta: { title: "404" },
+      },
     ],
-  },
-  {
-    path: "/:pathMatch(.*)*",
-    name: "NotFound",
-    component: () => import("@/views/NotFound.vue"),
-    meta: { title: "404" },
   },
 ];
 

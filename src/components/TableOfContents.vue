@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import { Icon } from '@iconify/vue';
+import { ref, onMounted, onUnmounted } from "vue";
+import { Icon } from "@iconify/vue";
 
 // 定义 TOC 数据结构
 interface TocItem {
@@ -13,26 +13,23 @@ interface TocItem {
 const props = defineProps({
   containerSelector: {
     type: String,
-    default: '#article-content'
-  }
+    default: "#article-content",
+  },
 });
 
 const toc = ref<TocItem[]>([]);
-const activeId = ref<string>('');
+const activeId = ref<string>("");
 const isMobileMenuOpen = ref<boolean>(false);
-const isMobile = ref<boolean>(window.innerWidth < 1200); // 初始化时就检测
+const isMobile = ref<boolean>(window.innerWidth < 1200);
 let observer: IntersectionObserver | null = null;
 let resizeObserver: ResizeObserver | null = null;
 
 // 检测是否为移动端
 const checkMobile = () => {
   const newIsMobile = window.innerWidth < 1200;
-  
-  // 只有真正发生变化时才更新
+
   if (isMobile.value !== newIsMobile) {
-    // 先关闭菜单
-    isMobileMenuOpen.value = false;
-    // 使用 nextTick 确保状态更新后再切换模式
+    closeMobileMenu(); // 关闭菜单并恢复滚动
     setTimeout(() => {
       isMobile.value = newIsMobile;
     }, 0);
@@ -44,7 +41,7 @@ const initToc = () => {
   const container = document.querySelector(props.containerSelector);
   if (!container) return;
 
-  const headers = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  const headers = container.querySelectorAll("h1, h2, h3, h4, h5, h6");
   const items: TocItem[] = [];
 
   headers.forEach((header, index) => {
@@ -54,7 +51,7 @@ const initToc = () => {
     items.push({
       id: header.id,
       text: (header as HTMLElement).innerText,
-      level: Number(header.tagName.replace('H', ''))
+      level: Number(header.tagName.replace("H", "")),
     });
   });
 
@@ -66,8 +63,8 @@ const initToc = () => {
 const setupObserver = (headers: NodeListOf<Element>) => {
   const options = {
     root: null,
-    rootMargin: '-100px 0px -66% 0px',
-    threshold: 0
+    rootMargin: "-100px 0px -66% 0px",
+    threshold: 0,
   };
 
   observer = new IntersectionObserver((entries) => {
@@ -86,31 +83,57 @@ const scrollToHeader = (id: string) => {
   activeId.value = id;
   const element = document.getElementById(id);
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    element.scrollIntoView({ behavior: "smooth", block: "start" });
     // 移动端点击后自动关闭菜单
     if (isMobile.value) {
-      isMobileMenuOpen.value = false;
+      closeMobileMenu();
     }
   }
 };
 
+// 关闭移动端菜单并恢复滚动
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false;
+  document.body.style.overflow = "";
+};
+
 // 切换移动端菜单
 const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value;
+  if (isMobileMenuOpen.value) {
+    closeMobileMenu();
+  } else {
+    isMobileMenuOpen.value = true;
+    document.body.style.overflow = "hidden";
+  }
+};
+
+const menu = ref<HTMLElement | null>(null);
+const menuSwitch = ref<HTMLElement | null>(null);
+
+// 点击外部关闭菜单
+const handleClick = (e: MouseEvent) => {
+  if (!isMobileMenuOpen.value) return;
+  if (menu.value === null || menuSwitch.value === null) return;
+
+  if (
+    !menu.value.contains(e.target as Node) &&
+    !menuSwitch.value.contains(e.target as Node)
+  ) {
+    closeMobileMenu();
+  }
 };
 
 onMounted(() => {
   initToc();
-  // 不需要再次调用 checkMobile，因为已经在 ref 初始化时设置了
-  
-  // 监听窗口大小变化
-  window.addEventListener('resize', checkMobile);
-  
-  // 使用 ResizeObserver 监听容器内容变化（如果内容是异步加载的）
+
+  // 监听窗口大小变化和点击事件
+  window.addEventListener("resize", checkMobile);
+  window.addEventListener("click", handleClick);
+
+  // 使用 ResizeObserver 监听容器内容变化
   const container = document.querySelector(props.containerSelector);
   if (container) {
     resizeObserver = new ResizeObserver(() => {
-      // 内容变化时重新初始化目录
       if (toc.value.length === 0) {
         initToc();
       }
@@ -120,33 +143,39 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  // 清理：恢复滚动
+  document.body.style.overflow = "";
+
   if (observer) {
     observer.disconnect();
   }
   if (resizeObserver) {
     resizeObserver.disconnect();
   }
-  window.removeEventListener('resize', checkMobile);
+  window.removeEventListener("resize", checkMobile);
+  window.removeEventListener("click", handleClick);
 });
 </script>
 
 <template>
   <div v-if="toc.length > 0">
     <!-- 移动端悬浮按钮 -->
-    <button 
+    <a
       v-if="isMobile"
+      ref="menuSwitch"
       class="toc-mobile-trigger"
       @click="toggleMobileMenu"
       :class="{ active: isMobileMenuOpen }"
       aria-label="目录"
     >
       <Icon icon="solar:reorder-broken" width="28" height="28" />
-    </button>
+    </a>
 
     <!-- 目录容器 -->
     <Transition :name="isMobile ? 'dropdown' : ''" mode="out-in">
-      <nav 
-        v-if="isMobile ? isMobileMenuOpen : true" 
+      <nav
+        ref="menu"
+        v-if="isMobile ? isMobileMenuOpen : true"
         :key="isMobile ? 'mobile' : 'desktop'"
         class="toc-container"
         :class="{ 'mobile-menu': isMobile }"
@@ -154,12 +183,16 @@ onUnmounted(() => {
         <div class="toc-header">
           <h3>目录</h3>
         </div>
-        
+
         <ul>
-          <li 
-            v-for="item in toc" 
+          <li
+            v-for="item in toc"
             :key="item.id"
-            :class="['toc-item', `level-${item.level}`, { active: activeId === item.id }]"
+            :class="[
+              'toc-item',
+              `level-${item.level}`,
+              { active: activeId === item.id },
+            ]"
             @click="scrollToHeader(item.id)"
           >
             <a>{{ item.text }}</a>
@@ -178,8 +211,6 @@ onUnmounted(() => {
   max-height: 80vh;
   overflow-y: auto;
   padding: 1rem;
-  border-left: 1px solid #eee;
-  background: #fff;
 }
 
 .toc-header {
@@ -193,21 +224,6 @@ onUnmounted(() => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #333;
-}
-
-.close-btn {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  padding: 0;
-  transition: color 0.2s;
-}
-
-.close-btn:hover {
-  color: #409eff;
 }
 
 ul {
@@ -220,45 +236,39 @@ ul {
   cursor: pointer;
   padding: 6px 0;
   font-size: 14px;
-  color: #666;
   transition: all 0.2s;
   line-height: 1.6;
   border-radius: 4px;
 }
 
-.toc-item:hover {
-  color: #409eff;
-}
-
 .toc-item.active {
-  /* color: #409eff; */
   font-weight: 600;
   border-left: 2px solid #409eff;
 }
 
-/* 为 active 状态的不同层级设置正确的缩进（原缩进 + 8px border补偿） */
+/* 为 active 状态的不同层级设置正确的缩进 */
 .toc-item.active.level-1 {
   padding-left: 8px;
 }
 
 .toc-item.active.level-2 {
-  padding-left: 16px; /* 8 + 8 */
+  padding-left: 16px;
 }
 
 .toc-item.active.level-3 {
-  padding-left: 28px; /* 20 + 8 */
+  padding-left: 28px;
 }
 
 .toc-item.active.level-4 {
-  padding-left: 40px; /* 32 + 8 */
+  padding-left: 40px;
 }
 
 .toc-item.active.level-5 {
-  padding-left: 52px; /* 44 + 8 */
+  padding-left: 52px;
 }
 
 .toc-item.active.level-6 {
-  padding-left: 64px; /* 56 + 8 */
+  padding-left: 64px;
 }
 
 .toc-item a {
@@ -267,7 +277,7 @@ ul {
   color: inherit;
 }
 
-/* 层级缩进 - 适用于桌面端和移动端 */
+/* 层级缩进 */
 .level-1 {
   padding-left: 0;
 }
@@ -296,51 +306,44 @@ ul {
   font-size: 12px;
 }
 
-/* 移动端悬浮按钮 - 纯图标悬浮效果 */
+/* 移动端悬浮按钮 */
 .toc-mobile-trigger {
   position: fixed;
   width: 48px;
   height: 48px;
   background: transparent;
-  color: #606266;
   border: none;
   cursor: pointer;
-  z-index: 1001;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
+  will-change: transform;
 }
 
 .toc-mobile-trigger:hover {
-  /* color: #409eff; */
-  transform: scale(1.1);
+  transform: scale(1.3);
 }
 
 .toc-mobile-trigger:active {
   transform: scale(0.9);
 }
 
-.toc-mobile-trigger.active {
-  /* color: #409eff; */
-}
-
-/* 移动端目录样式 - 下拉展开效果 */
+/* 移动端目录样式 */
 .toc-container.mobile-menu {
   position: fixed;
   top: 90px;
   right: 12px;
-  width: 280px;
-  max-width: calc(100vw - 24px);
-  max-height: 70vh;
+  width: fit-content;
   padding: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--global-header-border-bottom-color);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 5px var(--popover-box-shadow-color);
   z-index: 1000;
   overflow-y: auto;
-  background: #fff;
+  background: var(--popover-background-color);
+  backdrop-filter: blur(10px);
 }
 
 .mobile-menu .toc-item {
@@ -350,11 +353,10 @@ ul {
 }
 
 .mobile-menu .toc-item:active {
-  background: #f5f7fa;
   border-radius: 4px;
 }
 
-/* 下拉动画效果 - 从按钮位置向下展开 */
+/* 下拉动画效果 */
 .dropdown-enter-active {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: top right;
@@ -391,17 +393,11 @@ ul {
 }
 
 .toc-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
   border-radius: 3px;
 }
 
 .toc-container::-webkit-scrollbar-thumb {
-  background: #ccc;
   border-radius: 3px;
-}
-
-.toc-container::-webkit-scrollbar-thumb:hover {
-  background: #999;
 }
 
 /* 响应式调整 */
@@ -414,7 +410,7 @@ ul {
   }
 }
 
-/* 标题的滚动偏移（配合 scrollIntoView） */
+/* 标题的滚动偏移 */
 :global(#article-content h1),
 :global(#article-content h2),
 :global(#article-content h3),
@@ -423,5 +419,4 @@ ul {
 :global(#article-content h6) {
   scroll-margin-top: 65px;
 }
-
 </style>

@@ -78,8 +78,7 @@ watchEffect(() => {
 const asideContentRef = ref<HTMLElement | null>(null);
 const mainContentRef = ref<HTMLElement | null>(null);
 const clickOutside = (e: MouseEvent) => {
-  if (isSidebarCollapsed.value) return;
-  if (!isMobile.value) return;
+  if (isSidebarCollapsed.value || !isMobile.value) return;
   if (!asideContentRef.value || !mainContentRef.value) return;
   if (
     !asideContentRef.value.contains(e.target as Node) &&
@@ -102,7 +101,7 @@ onUnmounted(() => {
   <header class="globalheader">
     <nav class="globalnav">
       <section class="globalnav-left">
-        <span class="globalnav-title">Hiki Niito's space</span>
+        <span @click="$router.push('/')" class="globalnav-title">Hiki Niito's space</span>
       </section>
       <section class="globalnav-right">
         <Popover v-if="!isMobile" placement="bottom" trigger="hover">
@@ -132,7 +131,8 @@ onUnmounted(() => {
         :class="asideMobileModeCls"
       >
         <ol>
-          Connectivity Test
+          <li @click="$router.push('/404')">Connectivity Test</li>
+          <li @click="$router.push('/konosuba')">konosuba</li>
         </ol>
         <div v-if="isMobile" class="aside-theme-switch">
           <Selector
@@ -151,7 +151,7 @@ onUnmounted(() => {
     >
       <router-view v-slot="{ Component }">
         <transition mode="out-in">
-          <component :is="Component" />
+          <KeepAlive><component :is="Component" /></KeepAlive>
         </transition>
       </router-view>
     </section>
@@ -227,6 +227,10 @@ onUnmounted(() => {
       will-change: transform, opacity, visibity;
       z-index: var(--zindex-aside-content);
 
+      li {
+        padding-top: 20px;
+      }
+
       .aside-theme-switch {
         position: fixed;
         left: 0px;
@@ -247,7 +251,8 @@ onUnmounted(() => {
     }
 
     &.blurred {
-      filter: blur(2px) brightness(0.95);
+       /* it causes containing block context issue */
+      /* filter: blur(2px) brightness(0.95); */
     }
   }
 }
