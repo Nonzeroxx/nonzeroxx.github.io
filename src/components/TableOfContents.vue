@@ -340,7 +340,6 @@ ul {
   border: 1px solid var(--global-header-border-bottom-color);
   border-radius: 12px;
   box-shadow: 0 0 5px var(--popover-box-shadow-color);
-  z-index: 1000;
   overflow-y: auto;
   background: var(--popover-background-color);
   backdrop-filter: blur(10px);
